@@ -1,38 +1,35 @@
-#!/bin/bash
+# Define variables (adjust if needed)
+COMPOSE_FILE = docker-compose.yml
 
-## ------------------------------
-## Author: Amirhossein Pooladvand
-## ------------------------------
+# Phony targets to avoid warnings
+.PHONY: all build up down ps logs clean restart
 
-include .env
-export
+all: build
 
-.PHONY: help composer
+build:
+	@echo "Building Docker images..."
+	@docker-compose build
 
-test:
-	echo $(docker ps -f name=${PROJECT_NAME})
+up: build
+	@echo "Starting services..."
+	@docker-compose up -d
 
-help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+down:
+	@echo "Stopping and removing services..."
+	@docker-compose down
 
-build: ## Builds the docker-compose.yml file
-	docker compose build
+ps:
+	@echo "Showing container status..."
+	@docker-compose ps
 
-rebuild: ## Rebuilds docker-compose.yml
-	docker compose up --build --force-recreate --remove-orphans
+logs: service
+	@echo "Showing logs for $(service)..."
+	@docker-compose logs $(service)
 
-up: ## Create and start containers
-	docker compose up --remove-orphans
+clean: down
+	@echo "Removing volumes..."
+	@docker-compose down --volumes
 
-watch: ## Create, start and detach containers
-	docker compose up -d --remove-orphans
-
-down: ## Stop and remove resources
-	docker compose down
-
-ps: ## List project containers
-	@docker compose ps -f name=${PROJECT_NAME}
-
-login: ## Login into a specific container
-	@read -p "Enter the container name:" CONTAINER_NAME; \
-	docker exec -it $(PROJECT_NAME)-$$CONTAINER_NAME sh;
+restart:
+	@echo "Restarting services..."
+	@docker-compose restart
