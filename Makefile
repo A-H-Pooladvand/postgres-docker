@@ -33,3 +33,7 @@ clean: down
 restart:
 	@echo "Restarting services..."
 	@docker-compose restart
+
+# Allow specifying a service for logs command
+service:
+
